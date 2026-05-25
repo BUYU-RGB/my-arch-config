@@ -57,7 +57,7 @@ Minimal first commands:
 
 ```bash
 sudo pacman -Syu --needed git base-devel
-git clone https://github.com/YOUR_USER/my-arch-config.git ~/my-arch-config
+git clone https://github.com/BUYU-RGB/my-arch-config.git ~/my-arch-config
 cd ~/my-arch-config
 ./install.sh
 ```
@@ -87,7 +87,7 @@ The script will:
 Once this repository is published, the same flow can be compressed to:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/YOUR_USER/my-arch-config/main/scripts/bootstrap)" -- https://github.com/YOUR_USER/my-arch-config.git
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/BUYU-RGB/my-arch-config/main/scripts/bootstrap)" -- https://github.com/BUYU-RGB/my-arch-config.git
 ```
 
 ## Daily Use
