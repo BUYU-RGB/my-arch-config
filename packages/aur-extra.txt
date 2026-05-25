@@ -1,0 +1,5 @@
+clash-verge-rev-bin
+elephant-all
+localsend-bin
+spotify
+yaru-icon-theme

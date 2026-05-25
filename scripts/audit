@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+bash -n install.sh scripts/bootstrap scripts/clean-apps scripts/backup-current scripts/audit local/bin/my-*
+
+if command -v jq >/dev/null 2>&1; then
+  jq empty config/waybar/config.jsonc
+else
+  echo "jq not found; skipping Waybar JSON check." >&2
+fi
+
+if command -v rg >/dev/null 2>&1; then
+  legacy_name="$(printf '%s%s' 'om' 'archy')"
+  legacy_env="$(printf '%s%s%s' 'OMA' 'RCHY' '_PATH')"
+  legacy_path="$(printf '%s%s%s' '.local/share/' 'om' 'archy')"
+  residue_pattern="${legacy_name}|${legacy_env}|${legacy_path}"
+  if rg -ni "$residue_pattern" .; then
+    echo "Found legacy distro residue above." >&2
+    exit 1
+  fi
+else
+  echo "ripgrep not found; skipping legacy residue check." >&2
+fi
+
+git status --short

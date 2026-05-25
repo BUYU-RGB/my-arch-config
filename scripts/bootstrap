@@ -9,7 +9,12 @@ if [[ -z "$repo_url" ]]; then
   exit 2
 fi
 
-sudo pacman -Syu --needed git base-devel
+pacman_args=(-Syu --needed git base-devel)
+if [[ "${NONINTERACTIVE:-0}" == "1" ]]; then
+  pacman_args+=(--noconfirm)
+fi
+
+sudo pacman "${pacman_args[@]}"
 
 if [[ -d "$target_dir/.git" ]]; then
   git -C "$target_dir" pull --ff-only

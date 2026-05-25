@@ -1,16 +1,22 @@
 # My Arch Config
 
-This directory is a personal Arch/Hyprland setup.
+This is a personal Arch Linux + Hyprland restore project.
 
-The goal is not to maintain a custom distro. The goal is to keep a small, understandable set of files that can rebuild a similar desktop with normal Arch packages, AUR packages, and user config files.
+It is not a fork of the original desktop distro, not a distribution, and does not depend on the upstream runtime paths used by that project.
+
+The goal is to rebuild a similar personal desktop on top of a minimal Arch installation by using normal Arch packages, AUR packages, user config files, and local helper scripts.
 
 ## What Is Included
 
-- `packages/pacman-packages.txt`: explicitly installed Arch repo packages
-- `packages/aur-packages.txt`: explicitly installed AUR packages
+- `packages/pacman-core.txt`: core Arch repo packages for the Hyprland desktop
+- `packages/pacman-extra.txt`: extra personal applications and optional tools
+- `packages/aur-core.txt`: core AUR packages
+- `packages/aur-extra.txt`: extra AUR applications
 - `config/`: Hyprland, Waybar, Walker, Mako, and Alacritty config
+- `local/bin/my-*`: local helper scripts used by Hyprland and Waybar
 - `scripts/clean-apps`: quarantines broken user-level desktop launchers
-- `scripts/backup-current`: refreshes this directory from the current system
+- `scripts/backup-current`: refreshes config backups from the current system
+- `scripts/audit`: runs static checks
 
 ## Scope
 
@@ -20,16 +26,16 @@ The important parts of this setup are:
 - Waybar: top bar layout, status modules, click actions
 - Walker: app launcher style and search behavior
 - Mako: notifications
-- Alacritty: the single terminal kept for package installation and occasional maintenance
+- Alacritty: the only configured terminal
 
-Everything else should stay secondary. Avoid adding extra terminal configs, editor configs, or app-specific tweaks unless they directly support the desktop interaction model.
+Avoid adding extra terminal configs, editor configs, or application-specific tweaks unless they directly support the desktop interaction model.
 
 ## Core Interaction
 
 These two shortcuts are the center of the system:
 
 ```text
-Super + Space      -> my-launcher -> Walker app launcher
+Super + Space       -> my-launcher -> Walker app launcher
 Super + Alt + Space -> my-menu     -> Walker-powered system menu
 ```
 
@@ -46,13 +52,11 @@ The Hyprland bindings live in:
 config/hypr/bindings.conf
 ```
 
-This keeps the familiar app launcher and system menu flow while using local `my-launcher` and `my-menu` scripts.
-
 ## Restore On A Fresh Arch System
 
-Install a minimal Arch system first. During disk setup, do not enable LUKS if you do not want disk encryption. Create your normal user, give it sudo access, boot into the installed system, connect to the network, and log in as that user.
+Install a minimal Arch system first. Create your normal user, give it sudo access, boot into the installed system, connect to the network, and log in as that user.
 
-Minimal first commands:
+Minimal commands:
 
 ```bash
 sudo pacman -Syu --needed git base-devel curl
@@ -61,7 +65,21 @@ cd ~/my-arch-config
 ./install.sh
 ```
 
-After this finishes:
+This installs only the core package lists by default.
+
+To install extra personal applications too:
+
+```bash
+INSTALL_EXTRA=1 ./install.sh
+```
+
+For a non-interactive restore:
+
+```bash
+NONINTERACTIVE=1 ./install.sh
+```
+
+After installation:
 
 ```bash
 reboot
@@ -69,23 +87,43 @@ reboot
 
 Then choose the Hyprland session from SDDM.
 
-The script will:
+## Optional Install Flags
 
-- install bootstrap packages required to build AUR packages
-- install packages from `packages/pacman-packages.txt`
-- install `yay` from AUR if needed
-- install packages from `packages/aur-packages.txt`
-- back up existing configs to `~/.config.backup.YYYYMMDD-HHMMSS`
-- copy configs into `~/.config`
-- install `clean-apps` into `~/.local/bin`
-- quarantine broken user-level `.desktop` files instead of deleting them
-- enable SDDM and core desktop services
-- keep Alacritty as the only configured terminal
-
-Once this repository is published, the same flow can be compressed to:
+The installer keeps destructive or session-changing actions disabled by default.
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/BUYU-RGB/my-arch-config/main/scripts/bootstrap)" -- https://github.com/BUYU-RGB/my-arch-config.git
+INSTALL_EXTRA=1      # install extra package lists
+RUN_CLEAN_APPS=1     # quarantine broken user-level .desktop files
+RESTART_DESKTOP=1    # restart Waybar and Mako after install
+ENABLE_IWD=1         # enable iwd.service
+ENABLE_BLUETOOTH=1   # enable bluetooth.service
+ENABLE_PRINTING=1    # enable cups.service
+NONINTERACTIVE=1     # pass --noconfirm to pacman/yay
+```
+
+SDDM is enabled by default. To prevent that:
+
+```bash
+ENABLE_SDDM=0 ./install.sh
+```
+
+## Local Machine Overrides
+
+Hardware and locale-specific variables should go into:
+
+```text
+config/hypr/envs.local.conf
+```
+
+Keep `config/hypr/envs.conf` generic.
+
+Examples:
+
+```conf
+env = LIBVA_DRIVER_NAME,nvidia
+env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+env = LANG,zh_CN.UTF-8
+env = LC_CTYPE,zh_CN.UTF-8
 ```
 
 ## Daily Use
@@ -96,13 +134,13 @@ After uninstalling software, run:
 clean-apps
 ```
 
-This moves broken launchers into a quarantine directory under:
+This moves broken user-level launchers into:
 
 ```bash
 ~/.local/state/my-arch/desktop-apps
 ```
 
-It specifically avoids depending on external desktop-management tooling for cleanup, and it does not delete the original files in place.
+It does not delete the original files in place.
 
 ## Refresh This Backup
 
@@ -112,18 +150,26 @@ After changing your desktop config, run:
 my-arch-backup-current
 ```
 
-or from this directory:
+or from this repository:
 
 ```bash
 ./scripts/backup-current
 ```
 
-## Current Limitation
+Generated package snapshots are written under:
 
-The active Hyprland, Waybar, Walker, and Mako configs are intended to run from pacman/AUR packages plus this repository's `config/` and `local/bin/` files.
+```text
+packages/generated/
+```
 
-The long-term direction is:
+Curated package lists are not overwritten automatically.
 
-- keep Hyprland / Waybar / Walker appearance
-- use pacman and AUR for software
-- keep only personal config files under this directory
+## Static Audit
+
+Run:
+
+```bash
+./scripts/audit
+```
+
+It checks shell syntax, Waybar JSON, legacy distro residue, and Git status.

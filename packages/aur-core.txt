@@ -1,0 +1,3 @@
+rime-ice-pinyin-git
+walker
+xdg-terminal-exec

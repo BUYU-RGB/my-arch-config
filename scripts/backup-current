@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
-mkdir -p "$ROOT_DIR/config" "$ROOT_DIR/packages"
+mkdir -p "$ROOT_DIR/config" "$ROOT_DIR/packages/generated"
 
 for name in hypr waybar walker mako alacritty; do
   if [[ -e "$HOME/.config/$name" ]]; then
@@ -16,15 +16,22 @@ if [[ -f "$HOME/.config/xdg-terminals.list" ]]; then
   cp -a "$HOME/.config/xdg-terminals.list" "$ROOT_DIR/config/xdg-terminals.list"
 fi
 
-pacman -Qqm 2>/dev/null | sort > "$ROOT_DIR/packages/aur-packages.txt" || true
-pacman -Qqe | sort > /tmp/my-arch-explicit.txt
-comm -23 /tmp/my-arch-explicit.txt "$ROOT_DIR/packages/aur-packages.txt" > /tmp/my-arch-official-all.txt
+pacman -Qqm 2>/dev/null | sort > "$ROOT_DIR/packages/generated/aur-explicit.txt" || true
+pacman -Qqe | sort > "$ROOT_DIR/packages/generated/current-explicit-all.txt"
+
+comm -23 \
+  "$ROOT_DIR/packages/generated/current-explicit-all.txt" \
+  "$ROOT_DIR/packages/generated/aur-explicit.txt" \
+  > "$ROOT_DIR/packages/generated/pacman-explicit-all.txt"
+
 while IFS= read -r package; do
   repo="$(pacman -Si "$package" 2>/dev/null | sed -n 's/^Repository *: //p' | head -n 1)"
   case "$repo" in
     core|extra|multilib) printf '%s\n' "$package" ;;
   esac
-done < /tmp/my-arch-official-all.txt > "$ROOT_DIR/packages/pacman-packages.txt"
-cp /tmp/my-arch-explicit.txt "$ROOT_DIR/packages/current-explicit-all.txt"
+done < "$ROOT_DIR/packages/generated/pacman-explicit-all.txt" \
+  > "$ROOT_DIR/packages/generated/pacman-explicit-repo.txt"
 
 echo "Backup refreshed in: $ROOT_DIR"
+echo "Generated package snapshots were written under: packages/generated/"
+echo "Curated package lists were not overwritten."
