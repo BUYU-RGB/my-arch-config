@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
-mkdir -p "$ROOT_DIR/config" "$ROOT_DIR/local/share/applications" "$ROOT_DIR/packages"
+mkdir -p "$ROOT_DIR/config" "$ROOT_DIR/packages"
 
 for name in hypr waybar walker mako alacritty; do
   if [[ -e "$HOME/.config/$name" ]]; then
@@ -19,12 +19,12 @@ fi
 pacman -Qqm 2>/dev/null | sort > "$ROOT_DIR/packages/aur-packages.txt" || true
 pacman -Qqe | sort > /tmp/my-arch-explicit.txt
 comm -23 /tmp/my-arch-explicit.txt "$ROOT_DIR/packages/aur-packages.txt" > /tmp/my-arch-official-all.txt
-rg '^omarchy-' /tmp/my-arch-official-all.txt > "$ROOT_DIR/packages/omarchy-packages.txt" || true
-rg -v '^omarchy-' /tmp/my-arch-official-all.txt > "$ROOT_DIR/packages/pacman-packages.txt"
+while IFS= read -r package; do
+  repo="$(pacman -Si "$package" 2>/dev/null | sed -n 's/^Repository *: //p' | head -n 1)"
+  case "$repo" in
+    core|extra|multilib) printf '%s\n' "$package" ;;
+  esac
+done < /tmp/my-arch-official-all.txt > "$ROOT_DIR/packages/pacman-packages.txt"
 cp /tmp/my-arch-explicit.txt "$ROOT_DIR/packages/current-explicit-all.txt"
-
-find "$HOME/.local/share/applications" -maxdepth 1 -type f -name '*.desktop' \
-  ! -name 'Docker.desktop' ! -name 'typora.desktop' \
-  -exec cp -a {} "$ROOT_DIR/local/share/applications/" \; 2>/dev/null || true
 
 echo "Backup refreshed in: $ROOT_DIR"

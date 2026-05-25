@@ -1,2 +1,8 @@
 clash-verge-rev-bin
+elephant-all
+localsend-bin
 rime-ice-pinyin-git
+spotify
+walker
+xdg-terminal-exec
+yaru-icon-theme

@@ -1,7 +1,5 @@
-aether
 alacritty
 alsa-utils
-asdcontrol
 base
 base-devel
 bash-completion
@@ -20,17 +18,6 @@ curl
 dosfstools
 dust
 efibootmgr
-elephant
-elephant-calc
-elephant-clipboard
-elephant-desktopapplications
-elephant-files
-elephant-menus
-elephant-providerlist
-elephant-runner
-elephant-symbols
-elephant-unicode
-elephant-websearch
 evince
 exfatprogs
 expac
@@ -60,7 +47,6 @@ gvfs-smb
 hypridle
 hyprland
 hyprland-guiutils
-hyprland-preview-share-picker
 hyprlock
 hyprpicker
 hyprsunset
@@ -82,12 +68,9 @@ libqalculate
 libva-nvidia-driver
 libyaml
 limine
-limine-mkinitcpio-hook
-limine-snapper-sync
 linux
 linux-firmware
 linux-headers
-localsend
 mako
 man-db
 mise
@@ -121,7 +104,6 @@ slurp
 snapper
 socat
 sof-firmware
-spotify
 starship
 sudo
 sushi
@@ -132,13 +114,10 @@ tesseract
 tesseract-data-eng
 tldr
 tmux
-ttf-ia-writer
 ttf-jetbrains-mono-nerd
-tzupdate
 ufw
 unzip
 uwsm
-walker
 waybar
 whois
 wireless-regdb
@@ -148,8 +127,6 @@ wl-clipboard
 woff2-font-awesome
 xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
-xdg-terminal-exec
 xmlstarlet
-yaru-icon-theme
 zoxide
 zram-generator

@@ -1,14 +1,13 @@
 # My Arch Config
 
-This directory is a personal Arch/Hyprland setup extracted from the current Omarchy system.
+This directory is a personal Arch/Hyprland setup.
 
 The goal is not to maintain a custom distro. The goal is to keep a small, understandable set of files that can rebuild a similar desktop with normal Arch packages, AUR packages, and user config files.
 
 ## What Is Included
 
-- `packages/pacman-packages.txt`: explicitly installed repo packages, excluding `omarchy-*` packages
+- `packages/pacman-packages.txt`: explicitly installed Arch repo packages
 - `packages/aur-packages.txt`: explicitly installed AUR packages
-- `packages/omarchy-packages.txt`: Omarchy-specific packages kept aside for reference
 - `config/`: Hyprland, Waybar, Walker, Mako, and Alacritty config
 - `scripts/clean-apps`: removes broken user-level desktop launchers
 - `scripts/backup-current`: refreshes this directory from the current system
@@ -47,7 +46,7 @@ The Hyprland bindings live in:
 config/hypr/bindings.conf
 ```
 
-This intentionally mirrors the Omarchy feel while using local `my-launcher` and `my-menu` scripts.
+This keeps the familiar app launcher and system menu flow while using local `my-launcher` and `my-menu` scripts.
 
 ## Restore On A Fresh Arch System
 
@@ -104,7 +103,7 @@ This removes broken launchers from:
 ~/.local/share/applications
 ```
 
-It specifically avoids depending on Omarchy for cleanup.
+It specifically avoids depending on external desktop-management tooling for cleanup.
 
 ## Refresh This Backup
 
@@ -122,17 +121,10 @@ or from this directory:
 
 ## Current Limitation
 
-The active Hyprland, Waybar, Walker, and Mako configs are intended to run from pacman/AUR packages plus this repository's `config/` and `local/bin/` files. Omarchy references are kept only in reference notes and package snapshots.
-
-Useful checks:
-
-```bash
-rg -n 'omarchy|OMARCHY_PATH|\\.local/share/omarchy' ~/my-arch-config/config
-```
+The active Hyprland, Waybar, Walker, and Mako configs are intended to run from pacman/AUR packages plus this repository's `config/` and `local/bin/` files.
 
 The long-term direction is:
 
 - keep Hyprland / Waybar / Walker appearance
-- remove Omarchy update/install machinery
 - use pacman and AUR for software
 - keep only personal config files under this directory
