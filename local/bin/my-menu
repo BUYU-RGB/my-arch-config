@@ -92,7 +92,7 @@ show_style_menu() {
 
 show_setup_menu() {
   case "$(choose "Setup" "Audio\nBluetooth\nWi-Fi\nFiles\nDisk utility")" in
-    *Audio*) command -v wiremix >/dev/null 2>&1 && terminal -e wiremix || pavucontrol ;;
+    *Audio*) command -v wiremix >/dev/null 2>&1 && terminal -e wiremix || notify_missing "Audio controls are not installed." ;;
     *Bluetooth*) command -v bluetui >/dev/null 2>&1 && terminal -e bluetui || notify_missing "Bluetooth TUI is not installed." ;;
     *"Wi-Fi"*) command -v impala >/dev/null 2>&1 && terminal -e impala || notify_missing "Wi-Fi TUI is not installed." ;;
     *Files*) setsid uwsm-app -- nautilus --new-window >/dev/null 2>&1 & ;;
@@ -102,7 +102,7 @@ show_setup_menu() {
 }
 
 show_audio() {
-  command -v wiremix >/dev/null 2>&1 && terminal -e wiremix || pavucontrol
+  command -v wiremix >/dev/null 2>&1 && terminal -e wiremix || notify_missing "Audio controls are not installed."
 }
 
 show_bluetooth() {

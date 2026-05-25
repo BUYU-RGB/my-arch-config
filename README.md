@@ -9,7 +9,7 @@ The goal is not to maintain a custom distro. The goal is to keep a small, unders
 - `packages/pacman-packages.txt`: explicitly installed Arch repo packages
 - `packages/aur-packages.txt`: explicitly installed AUR packages
 - `config/`: Hyprland, Waybar, Walker, Mako, and Alacritty config
-- `scripts/clean-apps`: removes broken user-level desktop launchers
+- `scripts/clean-apps`: quarantines broken user-level desktop launchers
 - `scripts/backup-current`: refreshes this directory from the current system
 
 ## Scope
@@ -55,7 +55,7 @@ Install a minimal Arch system first. During disk setup, do not enable LUKS if yo
 Minimal first commands:
 
 ```bash
-sudo pacman -Syu --needed git base-devel
+sudo pacman -Syu --needed git base-devel curl
 git clone https://github.com/BUYU-RGB/my-arch-config.git ~/my-arch-config
 cd ~/my-arch-config
 ./install.sh
@@ -78,10 +78,9 @@ The script will:
 - back up existing configs to `~/.config.backup.YYYYMMDD-HHMMSS`
 - copy configs into `~/.config`
 - install `clean-apps` into `~/.local/bin`
-- avoid copying user-level `.desktop` files by default
+- quarantine broken user-level `.desktop` files instead of deleting them
 - enable SDDM and core desktop services
 - keep Alacritty as the only configured terminal
-- refresh desktop launcher cache
 
 Once this repository is published, the same flow can be compressed to:
 
@@ -97,13 +96,13 @@ After uninstalling software, run:
 clean-apps
 ```
 
-This removes broken launchers from:
+This moves broken launchers into a quarantine directory under:
 
 ```bash
-~/.local/share/applications
+~/.local/state/my-arch/desktop-apps
 ```
 
-It specifically avoids depending on external desktop-management tooling for cleanup.
+It specifically avoids depending on external desktop-management tooling for cleanup, and it does not delete the original files in place.
 
 ## Refresh This Backup
 

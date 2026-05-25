@@ -61,29 +61,18 @@ backup_existing_configs() {
 
 restore_configs() {
   echo "Restoring config files..."
-  mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share/applications"
+  mkdir -p "$HOME/.config" "$HOME/.local/bin"
 
   cp -a "$ROOT_DIR/config/." "$HOME/.config/"
   if [[ -f "$ROOT_DIR/config/xdg-terminals.list" ]]; then
     cp -a "$ROOT_DIR/config/xdg-terminals.list" "$HOME/.config/xdg-terminals.list"
   fi
-  cp -a "$ROOT_DIR/local/bin/." "$HOME/.local/bin/" 2>/dev/null || true
+  for script in "$ROOT_DIR"/local/bin/*; do
+    [[ -f "$script" ]] || continue
+    install -m 0755 "$script" "$HOME/.local/bin/$(basename "$script")"
+  done
   install -m 0755 "$ROOT_DIR/scripts/clean-apps" "$HOME/.local/bin/clean-apps"
   install -m 0755 "$ROOT_DIR/scripts/backup-current" "$HOME/.local/bin/my-arch-backup-current"
-
-  chmod +x "$HOME/.local/bin/"* 2>/dev/null || true
-}
-
-refresh_desktop_database() {
-  if command -v update-desktop-database >/dev/null 2>&1; then
-    update-desktop-database "$HOME/.local/share/applications" || true
-  fi
-}
-
-restart_user_services() {
-  systemctl --user daemon-reload || true
-  systemctl --user restart waybar.service 2>/dev/null || true
-  systemctl --user restart mako.service 2>/dev/null || true
 }
 
 enable_system_services() {
@@ -102,10 +91,7 @@ main() {
   install_aur_packages
   backup_existing_configs
   restore_configs
-  "$ROOT_DIR/scripts/clean-apps" || true
-  refresh_desktop_database
   enable_system_services
-  restart_user_services
 
   echo
   echo "Done."

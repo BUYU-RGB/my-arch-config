@@ -26,18 +26,20 @@ is_missing_exec() {
   fi
 }
 
-removed=0
+quarantined=0
+quarantine_dir="${XDG_STATE_HOME:-$HOME/.local/state}/my-arch/desktop-apps/$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$quarantine_dir"
 
 while IFS= read -r -d '' file; do
   cmd="$(desktop_exec "$file")"
   if is_missing_exec "$cmd"; then
-    printf 'Removing broken launcher: %s -> %s\n' "$(basename "$file")" "$cmd"
-    rm -f "$file"
-    removed=$((removed + 1))
+    printf 'Quarantining broken launcher: %s -> %s\n' "$(basename "$file")" "$cmd"
+    mv "$file" "$quarantine_dir/$(basename "$file")"
+    quarantined=$((quarantined + 1))
   fi
 done < <(find "$APP_DIR" -maxdepth 1 -type f -name '*.desktop' -print0)
 
-# Known Omarchy-generated launchers that often survive package removal.
+# Known stale launchers that often survive package removal.
 for stale in Docker.desktop typora.desktop; do
   if [[ -f "$APP_DIR/$stale" ]]; then
     case "$stale" in
@@ -48,13 +50,16 @@ for stale in Docker.desktop typora.desktop; do
         command -v typora >/dev/null 2>&1 && continue
         ;;
     esac
-    printf 'Removing stale launcher: %s\n' "$stale"
-    rm -f "$APP_DIR/$stale"
-    removed=$((removed + 1))
+    printf 'Quarantining stale launcher: %s\n' "$stale"
+    mv "$APP_DIR/$stale" "$quarantine_dir/$stale"
+    quarantined=$((quarantined + 1))
   fi
 done
 
-rm -f "$APP_DIR/icons/Docker.png" 2>/dev/null || true
+if [[ -f "$APP_DIR/icons/Docker.png" ]]; then
+  mkdir -p "$quarantine_dir/icons"
+  mv "$APP_DIR/icons/Docker.png" "$quarantine_dir/icons/Docker.png"
+fi
 
 if command -v update-desktop-database >/dev/null 2>&1; then
   update-desktop-database "$APP_DIR" >/dev/null 2>&1 || true
@@ -66,4 +71,4 @@ elif command -v systemctl >/dev/null 2>&1; then
   systemctl --user restart walker.service >/dev/null 2>&1 || true
 fi
 
-printf 'Cleaned %d launcher(s).\n' "$removed"
+printf 'Quarantined %d launcher(s).\n' "$quarantined"

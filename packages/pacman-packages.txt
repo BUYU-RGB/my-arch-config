@@ -54,20 +54,15 @@ imagemagick
 impala
 imv
 inetutils
-intel-ucode
 inxi
 iwd
 jq
-kernel-modules-hook
 kvantum-qt5
 less
-lib32-nvidia-utils
 libnotify
 libpulse
 libqalculate
-libva-nvidia-driver
 libyaml
-limine
 linux
 linux-firmware
 linux-headers
@@ -82,8 +77,6 @@ noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
 nss-mdns
-nvidia-open-dkms
-nvidia-utils
 pamixer
 pacman-contrib
 pipewire
@@ -92,7 +85,6 @@ pipewire-jack
 pipewire-pulse
 playerctl
 plocate
-plymouth
 polkit-gnome
 power-profiles-daemon
 python-gobject
@@ -101,7 +93,6 @@ ripgrep
 satty
 sddm
 slurp
-snapper
 socat
 sof-firmware
 starship
