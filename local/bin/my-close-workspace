@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+command -v hyprctl >/dev/null 2>&1 || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+
+active_workspace="$(hyprctl activeworkspace -j | jq -r '.id')"
+hyprctl clients -j |
+  jq -r --argjson workspace "$active_workspace" '.[] | select(.workspace.id == $workspace) | .address' |
+  while read -r address; do
+    [[ -n "$address" ]] || continue
+    hyprctl dispatch closewindow "address:$address" >/dev/null || true
+  done

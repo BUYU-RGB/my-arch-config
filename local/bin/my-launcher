@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v walker >/dev/null 2>&1; then
+  notify-send -u critical "Launcher unavailable" "walker is not installed" 2>/dev/null || true
+  exit 1
+fi
+
+if command -v elephant >/dev/null 2>&1 && ! pgrep -x elephant >/dev/null 2>&1; then
+  setsid uwsm-app -- elephant >/dev/null 2>&1 &
+fi
+
+if ! pgrep -f "walker --gapplication-service" >/dev/null 2>&1; then
+  setsid uwsm-app -- env GSK_RENDERER=cairo walker --gapplication-service >/dev/null 2>&1 &
+fi
+
+exec walker --width 644 --maxheight 300 --minheight 300 "$@"

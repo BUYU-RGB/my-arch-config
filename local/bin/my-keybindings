@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+{
+  echo "Super+Space              Apps"
+  echo "Super+Alt+Space          System menu"
+  echo "Super+Esc                Power menu"
+  echo "Super+Enter              Alacritty"
+  echo "Super+Shift+B            Browser"
+  echo "Print                    Screenshot area"
+  echo
+  rg -h '^bind' "$HOME/.config/hypr" 2>/dev/null | sed 's/^/  /' || true
+} > "$tmp"
+
+if command -v walker >/dev/null 2>&1; then
+  walker --dmenu --width 700 --maxheight 600 -p "Keybindings..." < "$tmp" >/dev/null
+else
+  alacritty -e less "$tmp"
+fi

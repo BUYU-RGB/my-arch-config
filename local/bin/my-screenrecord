@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if pgrep -f 'gpu-screen-recorder' >/dev/null 2>&1; then
+  pkill -INT -f 'gpu-screen-recorder'
+  pkill -RTMIN+8 waybar >/dev/null 2>&1 || true
+  exit 0
+fi
+
+dir="${XDG_VIDEOS_DIR:-$HOME/Videos}"
+mkdir -p "$dir"
+file="$dir/screenrecording-$(date +%Y%m%d-%H%M%S).mp4"
+
+if command -v gpu-screen-recorder >/dev/null 2>&1; then
+  setsid gpu-screen-recorder -w screen -f 60 -a default_output -o "$file" >/dev/null 2>&1 &
+  pkill -RTMIN+8 waybar >/dev/null 2>&1 || true
+  notify-send -u low "Screen recording started" "$file" 2>/dev/null || true
+else
+  notify-send -u critical "Screen recording unavailable" "gpu-screen-recorder is not installed" 2>/dev/null || true
+fi

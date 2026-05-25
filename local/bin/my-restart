@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  waybar)
+    pkill waybar >/dev/null 2>&1 || true
+    exec setsid uwsm-app -- waybar
+    ;;
+  walker)
+    pkill walker >/dev/null 2>&1 || true
+    pkill elephant >/dev/null 2>&1 || true
+    exec my-launcher --close
+    ;;
+  mako)
+    pkill mako >/dev/null 2>&1 || true
+    exec setsid uwsm-app -- mako
+    ;;
+  *)
+    echo "Usage: my-restart waybar|walker|mako" >&2
+    exit 2
+    ;;
+esac

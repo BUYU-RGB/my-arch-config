@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  volume)
+    volume="$(pamixer --get-volume-human 2>/dev/null || true)"
+    notify-send -u low -h string:x-canonical-private-synchronous:my-osd "Volume" "$volume" 2>/dev/null || true
+    ;;
+  mic)
+    muted="$(pamixer --default-source --get-mute 2>/dev/null || true)"
+    notify-send -u low -h string:x-canonical-private-synchronous:my-osd "Microphone" "$muted" 2>/dev/null || true
+    ;;
+  brightness)
+    current="$(brightnessctl get)"
+    max="$(brightnessctl max)"
+    percent="$((current * 100 / max))%"
+    notify-send -u low -h string:x-canonical-private-synchronous:my-osd "Brightness" "$percent" 2>/dev/null || true
+    ;;
+esac

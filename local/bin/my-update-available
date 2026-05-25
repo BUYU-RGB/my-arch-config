@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+updates=0
+if command -v checkupdates >/dev/null 2>&1; then
+  updates="$((updates + $(checkupdates 2>/dev/null | wc -l)))"
+fi
+if command -v yay >/dev/null 2>&1; then
+  updates="$((updates + $(yay -Qua 2>/dev/null | wc -l)))"
+fi
+
+if ((updates > 0)); then
+  printf ' %d\n' "$updates"
+fi

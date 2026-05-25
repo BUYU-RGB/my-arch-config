@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR="${APP_DIR:-$HOME/.local/share/applications}"
+
+[[ -d "$APP_DIR" ]] || exit 0
+
+desktop_exec() {
+  sed -n 's/^Exec=\([^ ]*\).*/\1/p' "$1" | head -n 1 | sed 's/^"//; s/"$//'
+}
+
+is_missing_exec() {
+  local cmd="$1"
+  [[ -z "$cmd" ]] && return 1
+
+  case "$cmd" in
+    env|sh|bash|xdg-terminal-exec|uwsm|uwsm-app|setsid)
+      return 1
+      ;;
+  esac
+
+  if [[ "$cmd" = /* ]]; then
+    [[ ! -x "$cmd" ]]
+  else
+    ! command -v "$cmd" >/dev/null 2>&1
+  fi
+}
+
+removed=0
+
+while IFS= read -r -d '' file; do
+  cmd="$(desktop_exec "$file")"
+  if is_missing_exec "$cmd"; then
+    printf 'Removing broken launcher: %s -> %s\n' "$(basename "$file")" "$cmd"
+    rm -f "$file"
+    removed=$((removed + 1))
+  fi
+done < <(find "$APP_DIR" -maxdepth 1 -type f -name '*.desktop' -print0)
+
+# Known Omarchy-generated launchers that often survive package removal.
+for stale in Docker.desktop typora.desktop; do
+  if [[ -f "$APP_DIR/$stale" ]]; then
+    case "$stale" in
+      Docker.desktop)
+        command -v lazydocker >/dev/null 2>&1 && continue
+        ;;
+      typora.desktop)
+        command -v typora >/dev/null 2>&1 && continue
+        ;;
+    esac
+    printf 'Removing stale launcher: %s\n' "$stale"
+    rm -f "$APP_DIR/$stale"
+    removed=$((removed + 1))
+  fi
+done
+
+rm -f "$APP_DIR/icons/Docker.png" 2>/dev/null || true
+
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "$APP_DIR" >/dev/null 2>&1 || true
+fi
+
+if command -v my-restart >/dev/null 2>&1; then
+  my-restart walker >/dev/null 2>&1 || true
+elif command -v systemctl >/dev/null 2>&1; then
+  systemctl --user restart walker.service >/dev/null 2>&1 || true
+fi
+
+printf 'Cleaned %d launcher(s).\n' "$removed"

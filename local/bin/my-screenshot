@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${1:-area}"
+dir="${XDG_PICTURES_DIR:-$HOME/Pictures}"
+mkdir -p "$dir"
+file="$dir/screenshot-$(date +%Y%m%d-%H%M%S).png"
+
+case "$mode" in
+  screen)
+    grim "$file"
+    ;;
+  area|*)
+    geometry="$(slurp)"
+    grim -g "$geometry" "$file"
+    ;;
+esac
+
+wl-copy < "$file" 2>/dev/null || true
+notify-send -u low "Screenshot copied & saved" "$file" 2>/dev/null || true

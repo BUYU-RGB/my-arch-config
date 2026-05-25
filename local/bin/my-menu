@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BACK_TO_EXIT=false
+
+launch_menu() {
+  local prompt="$1"
+  local options="$2"
+  local width="${3:-295}"
+  local maxheight="${4:-630}"
+
+  if pgrep -f "walker.*--dmenu" >/dev/null 2>&1; then
+    walker --close >/dev/null 2>&1 || true
+    exit 0
+  fi
+
+  printf '%b\n' "$options" | my-launcher --dmenu --width "$width" --minheight 1 --maxheight "$maxheight" -p "$prompt..." 2>/dev/null
+}
+
+choose() {
+  local prompt="$1"
+  local options="$2"
+  local width="${3:-295}"
+  local maxheight="${4:-630}"
+  printf '%b\n' "$options" | my-launcher --dmenu --width "$width" --minheight 1 --maxheight "$maxheight" -p "$prompt..." 2>/dev/null
+}
+
+terminal() {
+  xdg-terminal-exec "$@" 2>/dev/null || alacritty "$@"
+}
+
+open_url() {
+  setsid xdg-open "$1" >/dev/null 2>&1 &
+}
+
+notify_missing() {
+  notify-send -u low "Not configured" "$1" 2>/dev/null || true
+}
+
+back_or_main() {
+  [[ "$BACK_TO_EXIT" == true ]] && exit 0
+  show_main_menu
+}
+
+show_apps() {
+  my-launcher -p "Launch..."
+}
+
+show_learn_menu() {
+  case "$(choose "Learn" "Keybindings\nHyprland\nArch Wiki\nWalker\nWaybar")" in
+    *Keybindings*) notify-send -u low "Keybindings" "Super+Space apps, Super+Alt+Space menu, Super+Esc system" ;;
+    *Hyprland*) open_url "https://wiki.hypr.land/" ;;
+    *"Arch Wiki"*) open_url "https://wiki.archlinux.org/" ;;
+    *Walker*) open_url "https://github.com/abenz1267/walker" ;;
+    *Waybar*) open_url "https://github.com/Alexays/Waybar" ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_capture_menu() {
+  case "$(choose "Capture" "Screenshot area\nScreenshot screen\nColor picker\nScreen recording")" in
+    *"Screenshot area"*) my-screenshot area ;;
+    *"Screenshot screen"*) my-screenshot screen ;;
+    *"Color picker"*) pkill hyprpicker >/dev/null 2>&1 || hyprpicker -a ;;
+    *"Screen recording"*) my-screenrecord ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_toggle_menu() {
+  case "$(choose "Toggle" "Top bar\nIdle lock\nNight light\nNotifications")" in
+    *"Top bar"*) pkill -SIGUSR1 waybar ;;
+    *"Idle lock"*) my-toggle-service hypridle ;;
+    *"Night light"*) my-toggle-service hyprsunset ;;
+    *Notifications*) makoctl mode -t do-not-disturb ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_style_menu() {
+  case "$(choose "Style" "Reload Hyprland\nRestart Waybar\nRestart Walker\nRestart Mako\nEdit Hyprland\nEdit Waybar\nEdit Walker")" in
+    *"Reload Hyprland"*) hyprctl reload ;;
+    *"Restart Waybar"*) my-restart waybar >/dev/null 2>&1 & ;;
+    *"Restart Walker"*) my-restart walker >/dev/null 2>&1 || true ;;
+    *"Restart Mako"*) my-restart mako >/dev/null 2>&1 & ;;
+    *"Edit Hyprland"*) terminal -e "${EDITOR:-nvim}" "$HOME/.config/hypr/hyprland.conf" ;;
+    *"Edit Waybar"*) terminal -e "${EDITOR:-nvim}" "$HOME/.config/waybar/config.jsonc" ;;
+    *"Edit Walker"*) terminal -e "${EDITOR:-nvim}" "$HOME/.config/walker/config.toml" ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_setup_menu() {
+  case "$(choose "Setup" "Audio\nBluetooth\nWi-Fi\nFiles\nDisk utility")" in
+    *Audio*) command -v wiremix >/dev/null 2>&1 && terminal -e wiremix || pavucontrol ;;
+    *Bluetooth*) command -v bluetui >/dev/null 2>&1 && terminal -e bluetui || notify_missing "Bluetooth TUI is not installed." ;;
+    *"Wi-Fi"*) command -v impala >/dev/null 2>&1 && terminal -e impala || notify_missing "Wi-Fi TUI is not installed." ;;
+    *Files*) setsid uwsm-app -- nautilus --new-window >/dev/null 2>&1 & ;;
+    *"Disk utility"*) setsid uwsm-app -- gnome-disks >/dev/null 2>&1 & ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_audio() {
+  command -v wiremix >/dev/null 2>&1 && terminal -e wiremix || pavucontrol
+}
+
+show_bluetooth() {
+  command -v bluetui >/dev/null 2>&1 && terminal -e bluetui || notify_missing "Bluetooth TUI is not installed."
+}
+
+show_wifi() {
+  command -v impala >/dev/null 2>&1 && terminal -e impala || notify_missing "Wi-Fi TUI is not installed."
+}
+
+show_update_menu() {
+  case "$(choose "Update" "System packages\nAUR packages\nClean app launchers\nBackup config")" in
+    *"System packages"*) terminal -e bash -lc "sudo pacman -Syu; read -rp 'Press Enter to close...'" ;;
+    *"AUR packages"*) terminal -e bash -lc "yay -Syu; read -rp 'Press Enter to close...'" ;;
+    *"Clean app"*) clean-apps ;;
+    *"Backup config"*) my-arch-backup-current ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_about() {
+  notify-send -u low "My Arch" "Hyprland + Waybar + Walker personal desktop"
+}
+
+show_system_menu() {
+  case "$(choose "System" "Lock\nSuspend\nLogout\nRestart\nShutdown")" in
+    *Lock*) my-lock ;;
+    *Suspend*) systemctl suspend ;;
+    *Logout*) hyprctl dispatch exit ;;
+    *Restart*) systemctl reboot ;;
+    *Shutdown*) systemctl poweroff ;;
+    *) back_or_main ;;
+  esac
+}
+
+show_main_menu() {
+  case "$(launch_menu "Go" "Apps\nLearn\nTrigger\nStyle\nSetup\nUpdate\nAbout\nSystem")" in
+    *Apps*) show_apps ;;
+    *Learn*) show_learn_menu ;;
+    *Trigger*) show_capture_menu ;;
+    *Style*) show_style_menu ;;
+    *Setup*) show_setup_menu ;;
+    *Update*) show_update_menu ;;
+    *About*) show_about ;;
+    *System*) show_system_menu ;;
+  esac
+}
+
+case "${1:-}" in
+  apps) BACK_TO_EXIT=true; show_apps ;;
+  learn) BACK_TO_EXIT=true; show_learn_menu ;;
+  capture|trigger) BACK_TO_EXIT=true; show_capture_menu ;;
+  toggle) BACK_TO_EXIT=true; show_toggle_menu ;;
+  style) BACK_TO_EXIT=true; show_style_menu ;;
+  setup) BACK_TO_EXIT=true; show_setup_menu ;;
+  audio) BACK_TO_EXIT=true; show_audio ;;
+  bluetooth) BACK_TO_EXIT=true; show_bluetooth ;;
+  wifi) BACK_TO_EXIT=true; show_wifi ;;
+  update) BACK_TO_EXIT=true; show_update_menu ;;
+  system|power) BACK_TO_EXIT=true; show_system_menu ;;
+  *) show_main_menu ;;
+esac

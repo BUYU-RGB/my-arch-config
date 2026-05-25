@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if makoctl mode 2>/dev/null | rg -q 'do-not-disturb'; then
+  printf '{"text":"󰂛","class":"active","tooltip":"Notifications silenced"}\n'
+else
+  printf '{"text":"","class":"hidden","tooltip":"Notifications enabled"}\n'
+fi

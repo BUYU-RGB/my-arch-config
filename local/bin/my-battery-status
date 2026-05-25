@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+battery="$(find /sys/class/power_supply -maxdepth 1 -type l -name 'BAT*' | head -n 1 || true)"
+if [[ -z "$battery" ]]; then
+  echo "No battery found"
+  exit 0
+fi
+
+capacity="$(<"$battery/capacity")"
+status="$(<"$battery/status")"
+echo "Battery: ${capacity}% (${status})"

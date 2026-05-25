@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+location="${MY_WEATHER_LOCATION:-}"
+if [[ -z "$location" ]]; then
+  echo "Weather is disabled. Set MY_WEATHER_LOCATION to enable it."
+  exit 0
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+  echo "curl is not installed."
+  exit 0
+fi
+
+curl -fsS --max-time 5 "https://wttr.in/${location}?format=3" 2>/dev/null || echo "Weather unavailable"

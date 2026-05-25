@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/my-arch"
+state_file="$state_dir/no-gaps"
+mkdir -p "$state_dir"
+
+if [[ -f "$state_file" ]]; then
+  rm -f "$state_file"
+  hyprctl keyword general:gaps_in 5
+  hyprctl keyword general:gaps_out 10
+  hyprctl keyword general:border_size 2
+else
+  touch "$state_file"
+  hyprctl keyword general:gaps_in 0
+  hyprctl keyword general:gaps_out 0
+  hyprctl keyword general:border_size 0
+fi

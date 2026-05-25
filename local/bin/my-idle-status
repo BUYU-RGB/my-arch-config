@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if systemctl --user is-active --quiet hypridle; then
+  printf '{"text":"","class":"hidden","tooltip":"Idle lock enabled"}\n'
+else
+  printf '{"text":"󰒲","class":"active","tooltip":"Idle lock disabled"}\n'
+fi

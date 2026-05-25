@@ -1,0 +1,10 @@
+*.bak
+*.tmp
+*.swp
+*~
+.DS_Store
+
+# Local snapshots/reference material; not needed for fresh installs.
+reference/
+packages/current-explicit-all.txt
+local/share/applications/

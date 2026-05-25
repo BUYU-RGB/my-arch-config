@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+service="${1:?service name required}"
+
+if systemctl --user is-active --quiet "$service"; then
+  systemctl --user stop "$service"
+  notify-send -u low "$service stopped" 2>/dev/null || true
+else
+  systemctl --user start "$service"
+  notify-send -u low "$service started" 2>/dev/null || true
+fi

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+location="${MY_WEATHER_LOCATION:-}"
+if [[ -z "$location" ]] || ! command -v curl >/dev/null 2>&1; then
+  printf '{"text":"","class":"unavailable","tooltip":"Set MY_WEATHER_LOCATION to enable weather"}\n'
+  exit 0
+fi
+
+weather="$(curl -fsS --max-time 3 "https://wttr.in/${location}?format=1" 2>/dev/null || true)"
+if [[ -z "$weather" ]]; then
+  printf '{"text":"","class":"unavailable","tooltip":"Weather unavailable"}\n'
+else
+  printf '{"text":"%s","class":"","tooltip":"%s"}\n' "$weather" "$weather"
+fi
