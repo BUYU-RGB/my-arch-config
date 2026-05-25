@@ -2,7 +2,7 @@
 
 This is a personal Arch Linux + Hyprland restore project.
 
-It is not a fork of the original desktop distro, not a distribution, and does not depend on the upstream runtime paths used by that project.
+It is not a fork of any desktop distribution, not a distribution, and does not depend on external distribution-specific runtime paths.
 
 The goal is to rebuild a similar personal desktop on top of a minimal Arch installation by using normal Arch packages, AUR packages, user config files, and local helper scripts.
 
@@ -172,4 +172,4 @@ Run:
 ./scripts/audit
 ```
 
-It checks shell syntax, Waybar JSON, legacy distro residue, and Git status.
+It checks shell syntax, Waybar JSON, external runtime residue, and Git status.

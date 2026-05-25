@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 bash -n install.sh scripts/bootstrap scripts/clean-apps scripts/backup-current scripts/audit local/bin/my-*
@@ -10,16 +11,16 @@ else
 fi
 
 if command -v rg >/dev/null 2>&1; then
-  legacy_name="$(printf '%s%s' 'om' 'archy')"
-  legacy_env="$(printf '%s%s%s' 'OMA' 'RCHY' '_PATH')"
-  legacy_path="$(printf '%s%s%s' '.local/share/' 'om' 'archy')"
-  residue_pattern="${legacy_name}|${legacy_env}|${legacy_path}"
-  if rg -ni "$residue_pattern" .; then
-    echo "Found legacy distro residue above." >&2
+  pattern='omarch''y|OMARCHY_PATH|\.local/share/omarchy'
+
+  if rg -ni "$pattern" . \
+    --glob '!scripts/audit' \
+    --glob '!.git/**'; then
+    echo "Found external runtime residue above." >&2
     exit 1
   fi
 else
-  echo "ripgrep not found; skipping legacy residue check." >&2
+  echo "ripgrep not found; skipping external runtime residue check." >&2
 fi
 
 git status --short

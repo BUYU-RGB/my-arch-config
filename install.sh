@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,22 +29,6 @@ pacman_install_from_file() {
   sudo pacman "${args[@]}" - < "$list"
 }
 
-install_yay() {
-  command -v yay >/dev/null 2>&1 && return 0
-
-  echo "Installing yay from AUR..."
-
-  local build_dir
-  build_dir="$(mktemp -d)"
-  trap 'rm -rf "$build_dir"' RETURN
-
-  git clone https://aur.archlinux.org/yay.git "$build_dir/yay"
-  (
-    cd "$build_dir/yay"
-    makepkg -si --noconfirm
-  )
-}
-
 yay_install_from_file() {
   local list="$1"
   [[ -s "$list" ]] || return 0
@@ -70,17 +55,38 @@ install_bootstrap_packages() {
   sudo pacman "${args[@]}"
 }
 
+install_yay() {
+  command -v yay >/dev/null 2>&1 && return 0
+
+  echo "Installing yay from AUR..."
+
+  local build_dir
+  build_dir="$(mktemp -d)"
+  trap 'rm -rf "$build_dir"' RETURN
+
+  git clone https://aur.archlinux.org/yay.git "$build_dir/yay"
+
+  (
+    cd "$build_dir/yay"
+    makepkg -si --noconfirm
+  )
+}
+
 install_packages() {
   if [[ -s "$ROOT_DIR/packages/pacman-core.txt" ]]; then
     pacman_install_from_file "$ROOT_DIR/packages/pacman-core.txt"
-    [[ "${INSTALL_EXTRA:-0}" == "1" ]] && pacman_install_from_file "$ROOT_DIR/packages/pacman-extra.txt"
+    if [[ "${INSTALL_EXTRA:-0}" == "1" ]]; then
+      pacman_install_from_file "$ROOT_DIR/packages/pacman-extra.txt"
+    fi
   else
     pacman_install_from_file "$ROOT_DIR/packages/pacman-packages.txt"
   fi
 
   if [[ -s "$ROOT_DIR/packages/aur-core.txt" ]]; then
     yay_install_from_file "$ROOT_DIR/packages/aur-core.txt"
-    [[ "${INSTALL_EXTRA:-0}" == "1" ]] && yay_install_from_file "$ROOT_DIR/packages/aur-extra.txt"
+    if [[ "${INSTALL_EXTRA:-0}" == "1" ]]; then
+      yay_install_from_file "$ROOT_DIR/packages/aur-extra.txt"
+    fi
   else
     yay_install_from_file "$ROOT_DIR/packages/aur-packages.txt"
   fi
@@ -115,7 +121,6 @@ restore_configs() {
 
   install -m 0755 "$ROOT_DIR/scripts/clean-apps" "$HOME/.local/bin/clean-apps"
   install -m 0755 "$ROOT_DIR/scripts/backup-current" "$HOME/.local/bin/my-arch-backup-current"
-  install -m 0755 "$ROOT_DIR/scripts/audit" "$HOME/.local/bin/my-arch-audit"
 }
 
 refresh_desktop_database() {

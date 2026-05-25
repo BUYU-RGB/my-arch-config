@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-$HOME/.local/share/applications}"
-
 [[ -d "$APP_DIR" ]] || exit 0
 
 desktop_exec() {
@@ -11,6 +11,7 @@ desktop_exec() {
 
 is_missing_exec() {
   local cmd="$1"
+
   [[ -z "$cmd" ]] && return 1
 
   case "$cmd" in
@@ -50,6 +51,7 @@ for stale in Docker.desktop typora.desktop; do
         command -v typora >/dev/null 2>&1 && continue
         ;;
     esac
+
     printf 'Quarantining stale launcher: %s\n' "$stale"
     mv "$APP_DIR/$stale" "$quarantine_dir/$stale"
     quarantined=$((quarantined + 1))

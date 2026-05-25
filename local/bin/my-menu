@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
 BACK_TO_EXIT=false
@@ -22,6 +23,7 @@ choose() {
   local options="$2"
   local width="${3:-295}"
   local maxheight="${4:-630}"
+
   printf '%b\n' "$options" | my-launcher --dmenu --width "$width" --minheight 1 --maxheight "$maxheight" -p "$prompt..." 2>/dev/null
 }
 

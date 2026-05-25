@@ -6,5 +6,6 @@
 
 # Local snapshots/reference material; not needed for fresh installs.
 reference/
+packages/generated/
 packages/current-explicit-all.txt
 local/share/applications/
